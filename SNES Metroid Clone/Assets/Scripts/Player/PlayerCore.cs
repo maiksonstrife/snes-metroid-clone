@@ -13,13 +13,17 @@ namespace Player
 
         private PlayerState.PlayerState _playerState;
         private PlayerIdleState _playerIdleState;
+        private PlayerMovingState _playerMovingState;
+        
+        public PlayerIdleState PlayerIdleState => _playerIdleState;
+
+        public PlayerMovingState PlayerMovingState => _playerMovingState;
 
         private Animator _animator;
-        private bool _facingRight = false;
-        private bool _facingLeft = false;
 
-        [Range(1.0f, 10.0f)] [SerializeField] private float speed;
-    
+        [Range(1.0f, 10.0f)] [SerializeField] private float speed = 2.0f;
+        public float Speed => speed;
+
         #endregion
         
 
@@ -28,19 +32,24 @@ namespace Player
         // Start is called before the first frame update
         void Start()
         {
-            //Initialize State
-            _playerIdleState = new PlayerIdleState(this);
-            _playerState = _playerIdleState;
-
             //Initialize and null check Animator Controller
             _animator = this.GetComponent<Animator>();
             if(_animator == null) Debug.LogError("Player has no Animation Controller Component");
+            
+            //Initialize States
+            _playerIdleState = new PlayerIdleState(this, _animator);
+            _playerState = _playerIdleState;
+            
+            _playerMovingState = new PlayerMovingState(this, _animator);
+
+           
         }
 
         // Update is called once per frame
         void Update()
         {
             _playerState.Update();
+            MovementUpdate();
         }
 
         public void TransitionToState(PlayerState.PlayerState state)
@@ -50,12 +59,7 @@ namespace Player
             _playerState.EnterState();
         }
 
-        public void UpdateAnimatorTrigger(string trigger)
-        {
-            //TODO
-        }
-
-        public void UpdateAnimatorBool(string var, bool value)
+        void MovementUpdate()
         {
             
         }

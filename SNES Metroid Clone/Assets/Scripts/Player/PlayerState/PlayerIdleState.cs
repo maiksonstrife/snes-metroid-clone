@@ -1,34 +1,66 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 namespace Player.PlayerState
 {
     public class PlayerIdleState : PlayerState
     {
-        public PlayerIdleState(PlayerCore player)
+        private bool _facingRight;
+        private bool _facingLeft;
+
+        private float _horizInput;
+        
+        public PlayerIdleState(PlayerCore player, Animator animator)
         {
-            _player = player;
+            playerCore = player;
+            base.animator = animator;
         }
         
         // Update is called once per frame
         public override void EnterState()
         {
-            //TODO: PlayerIdleState::EnterState()
-            throw new System.NotImplementedException();
+            _facingLeft = false;
+            _facingRight = false;
         }
 
         public override void Update()
         {
-            //TODO: PlayerIdleState::Update()
+            _horizInput = Input.GetAxis("Horizontal");
             
+            if ((_horizInput > 0) && !_facingRight)
+            {
+                Debug.Log("FacingRight");
+                _facingRight = true;
+                _facingLeft = false;
+               
+            }
+            else if ((_horizInput < 0) && !_facingLeft)
+            {
+                Debug.Log("FacingLeft");
+                _facingRight = false;
+                _facingLeft = true;
+            }
+            else if ((_horizInput > 0.01f && _facingRight))
+            {
+                playerCore.TransitionToState(playerCore.PlayerMovingState);
+            }
+            else if ((_horizInput < -0.01f) && _facingLeft)
+            {
+                playerCore.TransitionToState(playerCore.PlayerMovingState);
+            }
+            AnimatorUpdate();
         }
 
         public override void ExitState()
         {
-            //TODO: PlayerIdleState::ExitState()
-            throw new System.NotImplementedException();
+            
+        }
+
+        void AnimatorUpdate()
+        {
+            animator.SetFloat("horizontalInput", _horizInput);
+            animator.SetBool("facingRight", _facingRight);
+            animator.SetBool("facingLeft", _facingLeft);
         }
     }
 }

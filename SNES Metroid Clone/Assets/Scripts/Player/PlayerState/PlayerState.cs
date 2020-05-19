@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Player.PlayerState
 {
     public abstract class PlayerState
     {
-        protected PlayerCore _player;
+        protected PlayerCore playerCore;
+        protected Animator animator;
         
         // EnterState is called upon entering the state
         public abstract void EnterState();
