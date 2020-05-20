@@ -1,30 +1,29 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Player.PlayerState;
+using UnityEngine;
 
 
 namespace Player.PlayerState
 {
-    public class PlayerIdleState : PlayerState
+    public class PlayerJumpState : PlayerState
     {
         private bool _facingRight;
         private bool _facingLeft;
 
         private float _horizInput;
-        
-        public PlayerIdleState(PlayerCore player, Animator animator)
+        public PlayerJumpState(PlayerCore player, Animator animator)
         {
             playerCore = player;
             base.animator = animator;
         }
         
-        // Update is called once per frame
         public override void EnterState()
         {
-            Debug.Log("PlayerIdleState");
-            _facingRight = animator.GetBool("facingRight");
-            _facingLeft = animator.GetBool("facingLeft");
-            
+            Debug.Log("PlayerJumpState");
         }
 
+        // Update is called once per frame
         public override void Update()
         {
             _horizInput = Input.GetAxis("Horizontal");
@@ -42,33 +41,28 @@ namespace Player.PlayerState
                 _facingRight = false;
                 _facingLeft = true;
             }
-            else if ((_horizInput > 0.01f && _facingRight))
+
+            if (playerCore.Controller.isGrounded)
             {
-                playerCore.TransitionToState(playerCore.PlayerMovingState);
+                animator.ResetTrigger("jump");
+                playerCore.TransitionToState(playerCore.PlayerIdleState);
             }
-            else if ((_horizInput < -0.01f) && _facingLeft)
-            {
-                playerCore.TransitionToState(playerCore.PlayerMovingState);
-            }
-            else if (Input.GetButtonDown("Fire1"))
-            {
-                playerCore.Jump();
-                playerCore.TransitionToState(playerCore.PlayerJumpState);
-            }
-            
             AnimatorUpdate();
         }
 
+        // ExitState is called upon exiting the state
         public override void ExitState()
         {
             
         }
+        
 
+        // State Collision Handling
         public override void OnCollisionEnter2D(Collision2D other)
         {
-            
+            playerCore.TransitionToState(playerCore.PlayerIdleState);
         }
-
+        
         void AnimatorUpdate()
         {
             animator.SetBool("grounded", playerCore.Controller.isGrounded);

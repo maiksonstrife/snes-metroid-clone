@@ -16,6 +16,9 @@ namespace Player.PlayerState
         // ExitState is called upon exiting the state
         public abstract void ExitState();
         
+        // State Collision Handling
+        public abstract void OnCollisionEnter2D(Collision2D other);
+
     }
 }
 

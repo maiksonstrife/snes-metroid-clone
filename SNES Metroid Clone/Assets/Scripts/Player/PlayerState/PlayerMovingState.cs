@@ -20,6 +20,7 @@ namespace Player.PlayerState
         // Update is called once per frame
         public override void EnterState()
         {
+            Debug.Log("PlayerMovingState");
             _horizInput = Input.GetAxis("Horizontal");
             _facingRight = animator.GetBool("facingRight");
             _facingLeft = animator.GetBool("facingLeft");
@@ -38,7 +39,7 @@ namespace Player.PlayerState
             else
             {
                 float dist = _horizInput * playerCore.Speed * Time.deltaTime;
-                playerCore.transform.position += new Vector3(dist, 0.0f, 0.0f);
+                playerCore.Move(new Vector3(dist, 0.0f, 0.0f));
                 
             }
             AnimatorUpdate();
@@ -48,9 +49,15 @@ namespace Player.PlayerState
         {
             
         }
-        
+
+        public override void OnCollisionEnter2D(Collision2D other)
+        {
+            
+        }
+
         void AnimatorUpdate()
         {
+            animator.SetBool("grounded", playerCore.Controller.isGrounded);
             animator.SetFloat("horizontalInput", _horizInput);
             animator.SetBool("facingRight", _facingRight);
             animator.SetBool("facingLeft", _facingLeft);
