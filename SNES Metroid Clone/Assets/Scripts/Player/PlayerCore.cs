@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Player.PlayerState;
+using Player.PlayerState.States;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -12,33 +13,36 @@ namespace Player
         #region Private Members
 
         private PlayerState.PlayerState _playerState;
-        private PlayerIdleState _playerIdleState;
-        private PlayerMovingState _playerMovingState;
-        private PlayerJumpState _playerJumpState;
+        private IdleCenterState _idleCenterState;
+        private IdleRightState _idleRightState;
+        private IdleLeftState _idleLeftState;
+        private MovingRightState _movingRightState;
+        private MovingLeftState _movingLeftState;
+        private FallingLeftState _fallingLeftState;
+        private FallingRightState _fallingRightState;
 
         private Animator _animator;
 
         private CharacterController _controller;
+        private PlayerController _playerController;
         private Vector3 _moveDirection = Vector3.zero;
         private Vector3 _gravity = Vector3.zero;
         private Vector3 _jumpVelocity = Vector3.zero;
 
-        [Range(1.0f, 10.0f)] [SerializeField] private float speed = 2.0f;
-        [Range(0.5f, 10.0f)] [SerializeField] private float gravity = 1.05f;
-        [Range(2.0f, 30.0f)] [SerializeField] private float jumpVelocity = 15.0f;
-        [Range(1.0, 2.5f)] [SerializeField] private float fallMultiplier = 1.0f;
-        [Range(1.0f, 2.5f)] [SerializeField] private float lowJumpMultiplier = 1.0f;
+    
         
         #endregion
         
         #region Properties
-        public float Speed => speed;
-        public float JumpVelocity => jumpVelocity;
+
         public CharacterController Controller => _controller;
-        public PlayerIdleState PlayerIdleState => _playerIdleState;
-        public PlayerMovingState PlayerMovingState => _playerMovingState;
-        public PlayerJumpState PlayerJumpState => _playerJumpState;
-        
+        public IdleCenterState IdleCenterState => _idleCenterState;
+        public IdleRightState IdleRightState => _idleRightState;
+        public IdleLeftState IdleLeftState => _idleLeftState;
+        public MovingRightState MovingRightState => _movingRightState;
+        public MovingLeftState MovingLeftState => _movingLeftState;
+        public FallingLeftState FallingLeftState => _fallingLeftState;
+        public FallingRightState FallingRightState => _fallingRightState;
         
         #endregion
         
@@ -54,26 +58,29 @@ namespace Player
 
             _controller = this.GetComponent<CharacterController>();
             if(_controller == null) Debug.LogError("Player has no CharacterController Component");
+
+            _playerController = this.GetComponent<PlayerController>();
             
-            _gravity = new Vector3(0.0f, -gravity, 0.0f);
-            _jumpVelocity = new Vector3(0.0f, jumpVelocity, 0.0f);
+ 
             
             //Initialize States
-            _playerIdleState = new PlayerIdleState(this, _animator);
-            _playerMovingState = new PlayerMovingState(this, _animator);
-            _playerJumpState = new PlayerJumpState(this, _animator);
-            
-            _playerState = _playerIdleState;
-            
+            _idleCenterState = new IdleCenterState(this, _animator, _playerController);
+            _idleRightState = new IdleRightState(this, _animator, _playerController);
+            _idleLeftState = new IdleLeftState(this, _animator, _playerController);
+            _movingRightState = new MovingRightState(this, _animator, _playerController);
+            _movingLeftState = new MovingLeftState(this, _animator, _playerController);
+            _fallingLeftState = new FallingLeftState(this, _animator, _playerController);
+            _fallingRightState = new FallingRightState(this, _animator, _playerController);
+
+            _playerState = _idleCenterState;
+
         }
 
         // Update is called once per frame
         void Update()
         {
-            _moveDirection = Vector3.zero;
             _playerState.Update();
-            MovementUpdate();
-            
+
         }
 
         public void TransitionToState(PlayerState.PlayerState state)
@@ -88,17 +95,7 @@ namespace Player
             Debug.Log("Collision");
             _playerState.OnCollisionEnter2D(other);
         }
-
-        void MovementUpdate()
-        {
-            _moveDirection += _gravity * Time.deltaTime;
-            _controller.Move(_moveDirection);
-        }
-
-        public void Move(Vector3 input)
-        {
-            _moveDirection += input;
-        }
+        
 
         public void Jump()
         {

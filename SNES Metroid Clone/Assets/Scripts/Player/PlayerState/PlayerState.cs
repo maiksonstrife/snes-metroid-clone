@@ -6,6 +6,7 @@ namespace Player.PlayerState
     {
         protected PlayerCore playerCore;
         protected Animator animator;
+        protected PlayerController controller;
         
         // EnterState is called upon entering the state
         public abstract void EnterState();

@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 252278238}
   - component: {fileID: 252278239}
   - component: {fileID: 252278240}
+  - component: {fileID: 252278241}
   m_Layer: 0
   m_Name: Samus
   m_TagString: Player
@@ -237,9 +238,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e3e2bc4b247de947b7688e9499efcfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
-  gravity: 1.05
-  jumpVelocity: 2
 --- !u!143 &252278240
 CharacterController:
   m_ObjectHideFlags: 0
@@ -251,13 +249,30 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 1.35
+  m_Height: 1.5
   m_Radius: 0.375
   m_SlopeLimit: 45
-  m_StepOffset: 0.1
-  m_SkinWidth: 0.001
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.1
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &252278241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 252278235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f0ee2e784b58414ebdd38e8aa05ade5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 3.7
+  gravity: 4.99
+  jumpVelocity: 15
+  fallMultiplier: 1
+  lowJumpMultiplier: 1
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
