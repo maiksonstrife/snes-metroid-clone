@@ -15,12 +15,12 @@ namespace Camera
         [SerializeField] private float cameraYOffset = 1.0f;
         [SerializeField] private float horizSpeed = 2.0f;
         [SerializeField] private float vertSpeed = 4.0f;
-
+        [SerializeField] private float cameraZ = -10.0f;
         #endregion
 
         #region Private Fields
         
-        private float cameraZ = -10.0f;
+        
         private Transform _camera;
         private PlayerController _playerController;
 

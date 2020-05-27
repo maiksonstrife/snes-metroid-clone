@@ -77,7 +77,7 @@ namespace Control
 
 		[FormerlySerializedAs("_skinWidth")]
 		[SerializeField]
-		[Range( 0.001f, 0.3f )]
+		[Range( 0.001f, 0.5f )]
 		float skinWidth = 0.02f;
 
 		/// <summary>
