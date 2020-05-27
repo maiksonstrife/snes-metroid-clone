@@ -157,7 +157,7 @@ namespace Player
                
             }
 
-            if (vertInput > 0.25f && isCrouched)               //Can return without vertical check because no moving when crouching
+            if (vertInput > 0.35f && isCrouched)               //Can return without vertical check because no moving when crouching
             {                                               //Will need to do vertical check when returning from morph ball state (unimplemented so far)
                // _boxCollider2D.size = _originalColliderSize;
                // transform.position = new Vector3(transform.position.x, transform.position.y + (_originalColliderSize.y * 0.25f), transform.position.z);
