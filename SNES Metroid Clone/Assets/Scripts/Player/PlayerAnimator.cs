@@ -24,7 +24,7 @@ namespace Player
             _facingRight = _animator.GetLayerIndex("Facing Right");
             _facingLeft = _animator.GetLayerIndex("Facing Left");
             
-            Debug.Log("Base: " + _base + "  Right: " + _facingRight + "  Left: " + _facingLeft);
+            //Debug.Log("Base: " + _base + "  Right: " + _facingRight + "  Left: " + _facingLeft);
         }
 
         // Update is called once per frame
