@@ -154,6 +154,8 @@ namespace Control
 		[HideInInspector][NonSerialized]
 		public CharacterCollisionState2D collisionState = new CharacterCollisionState2D();
 		[HideInInspector][NonSerialized]
+		public CharacterCollisionState2D persistentCollisionState = new CharacterCollisionState2D();
+		[HideInInspector][NonSerialized]
 		public Vector3 Velocity;
 		public bool IsGrounded { get { return collisionState.Below; } }
 
@@ -210,7 +212,7 @@ namespace Control
 					Physics2D.IgnoreLayerCollision( gameObject.layer, i );
 			}
 		}
-
+		
 
 		public void OnTriggerEnter2D( Collider2D col )
 		{

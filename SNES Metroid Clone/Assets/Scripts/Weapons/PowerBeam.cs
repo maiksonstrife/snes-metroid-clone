@@ -1,32 +1,32 @@
 ﻿using System;
 using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Weapons
 {
- 
-    
     
     [RequireComponent(typeof(CircleCollider2D))]
     public class PowerBeam : MonoBehaviour, IWeapon
     {
         [SerializeField] private int _damage = 10;
         [SerializeField] private float _speed = 10.0f;
+        public GameObject destructAnim;
         
         private Vector3 _direction = Vector3.right;
         private CircleCollider2D _collider;
         
         // Start is called before the first frame update
-        void Start()
+        public void Start()
         {
             _collider = GetComponent<CircleCollider2D>();
             StartCoroutine(SelfDestruct());
         }
 
         // Update is called once per frame
-        void Update()
+        public void Update()
         {
-            transform.position += _direction * (_speed * Time.deltaTime);
+            transform.Translate(_direction * (_speed * Time.deltaTime));
         }
 
         public void SetDirection(Vector3 direction)
@@ -34,10 +34,14 @@ namespace Weapons
             _direction = direction;
         }
 
-        private void OnCollisionEnter2D(Collision2D other)
+        public void OnCollisionEnter2D(Collision2D other)
         {
-            if(other.gameObject.layer == 9)               //Layer 9 is platforms
+            //Debug.Log(other.gameObject.ToString());
+            if (other.gameObject.layer == 9) //Layer 9 is platforms
+            {
+                GameObject.Instantiate(destructAnim, transform.position, quaternion.identity);
                 Destroy(this.gameObject);
+            }
         }
 
         private IEnumerator SelfDestruct()

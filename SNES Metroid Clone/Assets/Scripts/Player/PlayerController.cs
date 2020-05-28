@@ -34,6 +34,8 @@ namespace Player
         public bool hasWallJumped;
         public bool isCrouched;
         public bool wallJumpAble;
+        public bool wallJumpAbleRight;
+        public bool wallJumpAbleLeft;
         public bool isFalling;
         public bool isShooting;
         private bool _canShoot = true;
@@ -69,6 +71,7 @@ namespace Player
 
         private Vector3 _moveDirection = Vector3.zero;
         private bool _lastWallJumpLeft;
+        
         #endregion
 
         #region Delegates
@@ -105,7 +108,6 @@ namespace Player
             FacingUpdate(horizInput, vertInput);
             
             //If walljumped do not update horizontal direction
-            //TODO: walljump coroutine so that movement can apply after certain time into a wall jump
             if(hasWallJumped == false)
                 _moveDirection.x = horizInput * speed;
             
@@ -148,7 +150,7 @@ namespace Player
 
             _moveDirection.y -= gravity * Time.deltaTime;
             
-            //If crouching, we're not moving
+            //If crouching, or able to wall jump, no x movement
             if (isCrouched)
             {
                 _moveDirection.x = 0.0f;    //However can still change facing from movement inputs above...
@@ -197,14 +199,23 @@ namespace Player
             {
                 _moveDirection.y -= gravity * Time.deltaTime;
             }
+
+            if (!wallJumpAble)
+                wallJumpAble = CanWallJump();
             
             //Wall jumping
-            if (CanWallJump())     
+            if (wallJumpAble)     
             {
-                if (Input.GetButtonDown("Jump"))
+                if (Input.GetButtonDown("Jump") && wallJumpAbleLeft && horizInput < 0)
                 {
                     WallJump();
                 }
+
+                if (Input.GetButtonDown("Jump") && wallJumpAbleRight && horizInput > 0)
+                {
+                    WallJump();
+                }
+
             }
 
             if (Input.GetButtonDown("Fire1"))
@@ -284,6 +295,11 @@ namespace Player
                 else                                                      //Not in a corner... wall jump!
                 {
                     wallJumpAble = true;
+                    if (_collisionState.Left)
+                        wallJumpAbleRight = true;
+                    if (_collisionState.Right)
+                        wallJumpAbleLeft = true;
+                    StartCoroutine(WallJumpWindow());
                     return true;
                 }
             }
@@ -296,16 +312,17 @@ namespace Player
         
         private void WallJump()
         {
+            Debug.Log("Attempted Wall Jump");
             isJumping = true;
             OnWallJump();
-            if (_moveDirection.x < 0)
+            if (isFacingRight)
             {
                 _moveDirection.x = jumpSpeed * wallJumpMultiplier;
                 _moveDirection.y = jumpSpeed * wallJumpMultiplier;
                 isFacingRight = true;
                 _lastWallJumpLeft = false;
             }
-            else if (_moveDirection.x > 0)
+            else if (!isFacingRight)
             {
                 _moveDirection.x = -jumpSpeed * wallJumpMultiplier;
                 _moveDirection.y = jumpSpeed * wallJumpMultiplier;
@@ -327,15 +344,15 @@ namespace Player
                 if (isFacingRight)
                 {
                     Vector3 position = new Vector3(transform.position.x + 0.25f, transform.position.y + 1.6f, 0.0f);
-                    GameObject instantiatedProjectile = Instantiate(projectile, position, Quaternion.identity);
+                    GameObject instantiatedProjectile = Instantiate(projectile, position, Quaternion.Euler(0f, 0f, 180.0f));
                     IWeapon weapon = instantiatedProjectile.GetComponent<PowerBeam>();
                     if (weapon == null)
                     {
-                        Debug.LogError("Couldn't find IWeapon implementation on beam weapon.");
+                        Debug.LogError("Couldn't find IWeapon implementation on weapon.");
                     }
                     else
                     {
-                        weapon.SetDirection(Vector3.right);
+                        weapon.SetDirection(Vector3.left);
                     }
 
                 }
@@ -359,7 +376,8 @@ namespace Player
                 StartCoroutine(ShootCooldown());
             }
         }
-        
+
+
         #endregion
 
         #region Coroutines
@@ -381,6 +399,14 @@ namespace Player
         {
             yield return new WaitForSeconds(weaponCooldown);
             _canShoot = true;
+        }
+
+        private IEnumerator WallJumpWindow()
+        {
+            yield return new WaitForSeconds(0.3f);
+            wallJumpAble = false;
+            wallJumpAbleLeft = false;
+            wallJumpAbleRight = false;
         }
         
 
