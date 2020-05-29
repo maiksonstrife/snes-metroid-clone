@@ -23,6 +23,21 @@ namespace Player
 
         private Vector2 _originalColliderSize;
 
+        private struct Control
+        {
+            public float horizInput;
+            public float vertInput;
+
+            public bool jump;
+            public bool shoot;
+            public bool up;
+            public bool down;
+            public bool left;
+            public bool right;
+        };
+
+        private Control _controllerInput;
+
         #endregion
 
         #region State Fields
@@ -92,6 +107,7 @@ namespace Player
             _powerSuit = GetComponentInChildren<PowerSuit>();
             if(_powerSuit == null) Debug.LogError("No power suit attached to player.");
             
+            _controllerInput = new Control();
             _originalColliderSize = _boxCollider2D.size;
         }
 
@@ -100,16 +116,15 @@ namespace Player
             //Ensure collider reflects current sprite
             ColliderUpdate();
             
-            //Get controller input
-            float horizInput = Input.GetAxis("Horizontal");
-            float vertInput = Input.GetAxis("Vertical");
+            //Collect Input -> updates _controllerInput
+            GetControllerInput();
             
             //Update facing based on input
-            FacingUpdate(horizInput, vertInput);
+            FacingUpdate(_controllerInput);
             
             //If walljumped do not update horizontal direction
             if(hasWallJumped == false)
-                _moveDirection.x = horizInput * speed;
+                _moveDirection.x = _controllerInput.horizInput * speed;
             
             if (isGrounded)     //Player on the ground...
             {
@@ -120,7 +135,7 @@ namespace Player
 
                 if (Input.GetButtonDown("Jump"))
                 {
-                    Jump(horizInput);
+                    Jump(_controllerInput.horizInput);
                 }
 
             }
@@ -130,11 +145,11 @@ namespace Player
                 {
                     isFalling = true;
                 }
-                if (horizInput > 0)
+                if (_controllerInput.horizInput > 0)
                 {
                     isFacingRight = true;
                 }
-                else if (horizInput < 0)
+                else if (_controllerInput.horizInput < 0)
                 {
                     isFacingRight = false;
                 }
@@ -144,10 +159,10 @@ namespace Player
                     {
                         _moveDirection.y = _moveDirection.y * 0.5f;
                     }
-                    
                 }
             }
-
+            
+            //Apply gravity no matter what
             _moveDirection.y -= gravity * Time.deltaTime;
             
             //If crouching, or able to wall jump, no x movement
@@ -156,28 +171,29 @@ namespace Player
                 _moveDirection.x = 0.0f;    //However can still change facing from movement inputs above...
             }
                 
-            
+            //Move and update collisionState
             _cc2D.Move(_moveDirection * Time.deltaTime);
             _collisionState = _cc2D.collisionState;
 
             isGrounded = _collisionState.Below;
             
             //Crouching
-            if (vertInput < 0f && Math.Abs(horizInput) < 0.01f && !isCrouched)
+            if (_controllerInput.down && !_controllerInput.left && !_controllerInput.right && !isCrouched)
             {
-                isCrouched = true;
-               
+                if(_controllerInput.vertInput < 0.35)            //Since joystick, ensure intentional down
+                    isCrouched = true;
             }
 
-            if (vertInput > 0.35f && isCrouched)               //Can return without vertical check because no moving when crouching
-            {                                               //Will need to do vertical check when returning from morph ball state (unimplemented so far)
-               isCrouched = false;
+            if (_controllerInput.up && isCrouched)               //Can return without vertical check because no moving when crouching
+            {                                                    //Will need to do vertical check when returning from morph ball state (unimplemented so far)
+                if(_controllerInput.vertInput > 0.35)            //Since joystick, ensure intentional up
+                    isCrouched = false;
             }
             
             // //Morph Ball Unimplemented (Keep for later)
             // RaycastHit2D hitCeiling = Physics2D.Raycast(upper right corner, Vector2.up, 2.0f, default);
             // RaycastHit2D hitCeiling = Physics2D.Raycast(upper left corner, Vector2.up, 2.0f, default);
-            if ((vertInput < 0f) && isCrouched && _powerSuit.IsEnabled(PowerSuit.Upgrade.MorphBall))
+            if (_controllerInput.down && isCrouched && _powerSuit.IsEnabled(PowerSuit.Upgrade.MorphBall))
             {
                 //Enter morph ball state
             }
@@ -206,19 +222,19 @@ namespace Player
             //Wall jumping
             if (wallJumpAble)     
             {
-                if (Input.GetButtonDown("Jump") && wallJumpAbleLeft && horizInput < 0)
+                if (_controllerInput.jump && wallJumpAbleLeft && _controllerInput.left)
                 {
                     WallJump();
                 }
 
-                if (Input.GetButtonDown("Jump") && wallJumpAbleRight && horizInput > 0)
+                if (_controllerInput.jump && wallJumpAbleRight && _controllerInput.right)
                 {
                     WallJump();
                 }
 
             }
 
-            if (Input.GetButtonDown("Fire1"))
+            if (_controllerInput.shoot)
             {
                 FireWeapon();
             }
@@ -249,13 +265,30 @@ namespace Player
             _cc2D.RecalculateDistanceBetweenRays();
         }
         
-        private void FacingUpdate(float horizInput, float vertInput)
+        private void GetControllerInput()
         {
-            if (horizInput > 0)
+            _controllerInput.horizInput = Input.GetAxis("Horizontal");
+            _controllerInput.vertInput = Input.GetAxis("Vertical");
+            _controllerInput.jump = Input.GetButtonDown("Jump");
+            _controllerInput.shoot = Input.GetButtonDown("Fire1");
+
+            _controllerInput.up = _controllerInput.vertInput > 0 ? true : false;
+            _controllerInput.down = _controllerInput.vertInput < 0 ? true : false;
+            _controllerInput.left = _controllerInput.horizInput < 0 ? true : false;
+            _controllerInput.right = _controllerInput.horizInput > 0 ? true : false;
+        }
+        
+        private void FacingUpdate(Control controller)
+        {
+            if (!controller.left && !controller.right)
+            {
+                isFacingRight = isFacingRight;
+            }
+            else if (controller.right && !controller.left)
             {
                 isFacingRight = true;
             }
-            else if (horizInput < 0)
+            else if (controller.left && !controller.right)
             {
                 isFacingRight = false;
             }
