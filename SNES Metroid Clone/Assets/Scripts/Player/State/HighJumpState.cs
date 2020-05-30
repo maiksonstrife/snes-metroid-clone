@@ -11,9 +11,8 @@ namespace Player.State
         
         public override void EnterState()
         {
+            player.Animator.HighJump();
             Debug.Log("Entered High Jump State");
-            player.isJumping = true;
-            player.isHighJumping = true;
         }
 
         public override void Update(ControllerInput input)
@@ -28,6 +27,8 @@ namespace Player.State
             {
                 player.isFacingRight = false;
             }
+
+            player.Animator.JoystickUpdate(input);
             
             player.moveDirection.x = input.HorizInput * player.speed;
             player.moveDirection.y -= player.gravity * Time.deltaTime;
@@ -54,8 +55,7 @@ namespace Player.State
         public override void ExitState()
         {
             Debug.Log("Exited High Jump State");
-            player.isJumping = false;
-            player.isHighJumping = false;
+ 
         }
 
         public override string ToString()

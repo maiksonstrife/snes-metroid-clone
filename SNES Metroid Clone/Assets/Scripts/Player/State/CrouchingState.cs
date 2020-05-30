@@ -11,7 +11,8 @@ namespace Player.State
         }
         public override void EnterState()
         {
-            player.isCrouched = true;
+            player.Animator.Crouch();
+            Debug.Log("Entered Crouched State");
         }
 
         public override void Update(ControllerInput input)
@@ -24,6 +25,8 @@ namespace Player.State
             {
                 player.isFacingRight = false;
             }
+
+            player.Animator.JoystickUpdate(input);
 
             player.moveDirection = Vector3.zero;
             
@@ -50,7 +53,8 @@ namespace Player.State
 
         public override void ExitState()
         {
-            player.isCrouched = false;
+
+            Debug.Log("Exited Crouch State");
         }
 
         public override string ToString()

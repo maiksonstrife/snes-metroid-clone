@@ -25,6 +25,8 @@ namespace Player.State
                 player.isFacingRight = false;
             }
 
+            player.Animator.JoystickUpdate(input);
+
             player.moveDirection.x = input.HorizInput * player.speed;
 
             player.moveDirection.y -= player.gravity * Time.deltaTime;

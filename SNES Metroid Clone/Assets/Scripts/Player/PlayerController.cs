@@ -20,6 +20,8 @@ namespace Player
         private BoxCollider2D _boxCollider2D;
         private CharacterController2D.CharacterCollisionState2D _collisionState;
 
+        public PlayerAnimator Animator;
+
         public CharacterController2D.CharacterCollisionState2D CollisionState
         {
             get => _collisionState;
@@ -39,40 +41,19 @@ namespace Player
         #region State
 
         private PlayerState _currentState;
-        public StandingState standingState;
-        public CrouchingState crouchingState;
-        public HighJumpState highJumpState;
-        public SomersaultState somersaultState;
-        public MorphBallState morphBallState;
-        public FallingState fallingState;
+        [NonSerialized] public StandingState standingState;
+        [NonSerialized] public CrouchingState crouchingState;
+        [NonSerialized] public HighJumpState highJumpState;
+        [NonSerialized] public SomersaultState somersaultState;
+        [NonSerialized] public MorphBallState morphBallState;
+        [NonSerialized] public FallingState fallingState;
         
         public bool isGrounded;
-        public bool isJumping;
-        public bool isHighJumping;
         public bool isFacingRight;
-        public bool hasWallJumped;
-        public bool isCrouched;
-        public bool wallJumpAble;
-        public bool wallJumpAbleRight;
-        public bool wallJumpAbleLeft;
-        public bool isFalling;
+
         public bool isShooting;
         private bool _canShoot = true;
-        public bool isMorphBall;
-        
-        public enum Facing
-        {
-            Center,
-            Right,
-            Left,
-            AimUpLeft,
-            AimUpRight,
-            AimDownLeft,
-            AimDownRight
-        };
 
-        public Facing facing = Facing.Center;
-        
         #endregion
         
 
@@ -80,11 +61,12 @@ namespace Player
         
         [SerializeField] public float speed = 6.0f;
         [SerializeField] public float jumpSpeed = 8.0f;
-        [SerializeField] private float ballJumpSpeed = 6.0f;
+        [SerializeField] public float ballJumpSpeed = 6.0f;
         [SerializeField] public float gravity = 20.0f;
-        [SerializeField] private float wallJumpMultiplier = 1.5f;
-        [SerializeField] private float wallJumpControlDelay = 0.5f;
-        [SerializeField] private float weaponCooldown = 0.25f;
+        [SerializeField] public float wallJumpMultiplier = 1.5f;
+        [SerializeField] public float wallJumpControlDelay = 0.5f;
+        [SerializeField] public float weaponCooldown = 0.25f;
+        
         #endregion
 
         #region Movement
@@ -93,15 +75,7 @@ namespace Player
 
         #endregion
 
-        #region Delegates
-
-        //Hack to Animator for wall jump able to wall jump transition
-        public delegate void WallJumpTrigger();
-        public static WallJumpTrigger OnWallJump;
-        
-
-        #endregion
-        
+ 
         #region Monobehaviour
         
         public void Start()
@@ -110,6 +84,8 @@ namespace Player
             _boxCollider2D = GetComponent<BoxCollider2D>();   //No null check, required component with CC2D.
             powerSuit = GetComponentInChildren<PowerSuit>();
             if(powerSuit == null) Debug.LogError("No power suit attached to player.");
+
+            Animator = GetComponent<PlayerAnimator>();
             
             _controllerInput = new ControllerInput();
             _originalColliderSize = _boxCollider2D.size;
@@ -132,8 +108,10 @@ namespace Player
             //Collect Input -> updates _controllerInput
             _controllerInput.Update();
             
+            //Update Current State
             _currentState.Update(_controllerInput);
 
+            //TODO work shooting into state management
             if (_controllerInput.Shoot)
             {
                 FireWeapon();
@@ -155,13 +133,10 @@ namespace Player
 
         public void TransitionToState(PlayerState state)
         {
-  
             if (_currentState != null)
             {
                 _currentState.ExitState();
             }
-
-        
             _currentState = state;
             _currentState.EnterState();
         }
@@ -181,12 +156,6 @@ namespace Player
                                                     0.0f);
             _cc2D.RecalculateDistanceBetweenRays();
         }
-
-      
-
-        
-  
-        
         
         
         private void FireWeapon()

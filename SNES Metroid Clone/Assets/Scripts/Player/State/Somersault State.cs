@@ -12,7 +12,7 @@ namespace Player.State
 
         private bool _hasWallJumped;
 
-        private float _wallJumpMultiplier = 1.5f;
+        
         
         public SomersaultState(PlayerController playerController)
         {
@@ -20,8 +20,9 @@ namespace Player.State
         }
         public override void EnterState()
         {
+            player.Animator.Somersault();
             Debug.Log("Entered Somersault State");
-            player.isJumping = true;
+            
             _wallJumpAble = false;
             _wallJumpAbleLeft = false;
             _wallJumpAbleRight = false;
@@ -37,6 +38,8 @@ namespace Player.State
             {
                 player.isFacingRight = false;
             }
+
+            player.Animator.JoystickUpdate(input);
             
             if(Input.GetButtonUp("Jump"))
             {
@@ -61,7 +64,6 @@ namespace Player.State
             player.isGrounded = player.CollisionState.Below;
             if (player.isGrounded)
             {
-                player.isJumping = false;
                 //Transition to Standing State
                 player.TransitionToState(player.standingState);
                 return;
@@ -120,16 +122,20 @@ namespace Player.State
 
         private void WallJump()
         {
+            player.Animator.WallJump();
+            
             if (player.isFacingRight)
             {
-                player.moveDirection.x = player.jumpSpeed * _wallJumpMultiplier;
-                player.moveDirection.y = player.jumpSpeed * _wallJumpMultiplier;
+                player.moveDirection.x = player.jumpSpeed * player.wallJumpMultiplier;
+                player.moveDirection.y = player.jumpSpeed * player.wallJumpMultiplier;
             }
             else
             {
-                player.moveDirection.x = -player.jumpSpeed * _wallJumpMultiplier;
-                player.moveDirection.y = player.jumpSpeed * _wallJumpMultiplier;
+                player.moveDirection.x = -player.jumpSpeed * player.wallJumpMultiplier;
+                player.moveDirection.y = player.jumpSpeed * player.wallJumpMultiplier;
             }
+
+            _hasWallJumped = true;
         }
 
         public override string ToString()
@@ -143,6 +149,7 @@ namespace Player.State
             _wallJumpAble = false;
             _wallJumpAbleLeft = false;
             _wallJumpAbleRight = false;
+            _hasWallJumped = false;
         }
         
     }

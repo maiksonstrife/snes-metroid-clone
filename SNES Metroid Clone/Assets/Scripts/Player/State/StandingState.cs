@@ -11,6 +11,7 @@ namespace Player.State
         }
         public override void EnterState()
         {
+            player.Animator.Stand();
             Debug.Log("Entered Standing State");
         }
 
@@ -25,6 +26,8 @@ namespace Player.State
             {
                 player.isFacingRight = false;
             }
+            
+            player.Animator.JoystickUpdate(input);
 
             player.moveDirection.x = input.HorizInput * player.speed;
             player.moveDirection.y = 0.0f;
@@ -34,8 +37,6 @@ namespace Player.State
                 if (Mathf.Abs(input.HorizInput) < 0.15)
                 {
                     //Transition to High Jump
-                    player.isJumping = true;
-                    player.isHighJumping = true;
                     player.isGrounded = false;
                     player.moveDirection.y += player.jumpSpeed;
                     player.TransitionToState(player.highJumpState);
@@ -44,8 +45,6 @@ namespace Player.State
                 else
                 {
                     //Transition to Somersault
-                    player.isJumping = true;
-                    player.isGrounded = false;
                     player.moveDirection.y += player.jumpSpeed;
                     player.TransitionToState(player.somersaultState);
                     return;
