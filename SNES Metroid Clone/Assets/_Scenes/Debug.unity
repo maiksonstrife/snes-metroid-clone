@@ -22332,6 +22332,20 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1943734443, guid: 04dccb33f292dbc4997c5c0679232e9a, type: 3}
+      propertyPath: _morphballEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4115657746869250571, guid: 04dccb33f292dbc4997c5c0679232e9a,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4115657746869250571, guid: 04dccb33f292dbc4997c5c0679232e9a,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.93
+      objectReference: {fileID: 0}
     - target: {fileID: 4115657747811724273, guid: 04dccb33f292dbc4997c5c0679232e9a,
         type: 3}
       propertyPath: m_Name
