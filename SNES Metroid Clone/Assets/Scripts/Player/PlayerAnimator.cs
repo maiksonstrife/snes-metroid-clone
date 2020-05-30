@@ -66,7 +66,35 @@ namespace Player
             }
         }
 
-        private void WallJump()
+        public void FaceRight()
+        {
+            _animator.SetLayerWeight(_facingRight, 1.0f);
+            _currentLayer = _facingRight;
+            ZeroOtherWeights();
+        }
+
+        public void FaceLeft()
+        {
+            _animator.SetLayerWeight(_facingLeft, 1.0f);
+            _currentLayer = _facingLeft;
+            ZeroOtherWeights();
+        }
+
+        public void JoystickUpdate(ControllerInput input)
+        {
+            _animator.SetFloat("Horizontal Input", Mathf.Abs(input.HorizInput));
+        }
+        public void Crouch()
+        {
+            _animator.SetBool("Is Crouching", true);
+        }
+
+        public void Stand()
+        {
+            _animator.SetBool("Is Crouching", false);
+        }
+
+        public void WallJump()
         {
             _animator.SetTrigger("Wall Jump");
         }
