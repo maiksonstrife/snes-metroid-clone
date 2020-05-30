@@ -39,6 +39,7 @@ namespace Player
             _animator.SetBool("Wall Jump Able", _playerController.wallJumpAble);
             if(!_playerController.wallJumpAble) _animator.ResetTrigger("Wall Jump");    //Need to reset if slid to point where not on the wall
             _animator.SetBool("Is Crouching", _playerController.isCrouched);
+            _animator.SetBool("Is Morphball", _playerController.isMorphBall);
             
             if (_playerController.isFacingRight && _currentLayer != _facingRight)
             {

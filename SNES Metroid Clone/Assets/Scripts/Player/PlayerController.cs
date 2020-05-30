@@ -4,7 +4,7 @@ using Control;
 using UnityEngine;
 
 using Equipment;
-using UnityEngine.PlayerLoop;
+using UnityEngine.Serialization;
 using Weapons;
 
 namespace Player
@@ -15,32 +15,27 @@ namespace Player
         #region Private Fields
 
         private CharacterController2D _cc2D;
+        public CharacterController2D CC2D => _cc2D;
         private BoxCollider2D _boxCollider2D;
         private CharacterController2D.CharacterCollisionState2D _collisionState;
+
+        public CharacterController2D.CharacterCollisionState2D CollisionState
+        {
+            get => _collisionState;
+            set => _collisionState = value;
+        }
+
         private Sprite _sprite;
         private Transform _powerSuitTransform;
         private PowerSuit _powerSuit;
 
         private Vector2 _originalColliderSize;
 
-        private struct Control
-        {
-            public float horizInput;
-            public float vertInput;
-
-            public bool jump;
-            public bool shoot;
-            public bool up;
-            public bool down;
-            public bool left;
-            public bool right;
-        };
-
-        private Control _controllerInput;
+        private ControllerInput _controllerInput;
 
         #endregion
 
-        #region State Fields
+        #region State
 
         public bool isGrounded;
         public bool isJumping;
@@ -54,6 +49,7 @@ namespace Player
         public bool isFalling;
         public bool isShooting;
         private bool _canShoot = true;
+        public bool isMorphBall;
         
         public enum Facing
         {
@@ -73,10 +69,10 @@ namespace Player
 
         #region Tunable Fields
         
-        [SerializeField] private float speed = 6.0f;
-        [SerializeField] private float jumpSpeed = 8.0f;
+        [SerializeField] public float speed = 6.0f;
+        [SerializeField] public float jumpSpeed = 8.0f;
         [SerializeField] private float ballJumpSpeed = 6.0f;
-        [SerializeField] private float gravity = 20.0f;
+        [SerializeField] public float gravity = 20.0f;
         [SerializeField] private float wallJumpMultiplier = 1.5f;
         [SerializeField] private float wallJumpControlDelay = 0.5f;
         [SerializeField] private float weaponCooldown = 0.25f;
@@ -84,7 +80,7 @@ namespace Player
 
         #region Movement
 
-        private Vector3 _moveDirection = Vector3.zero;
+        public Vector3 moveDirection = Vector3.zero;
         private bool _lastWallJumpLeft;
         
         #endregion
@@ -107,7 +103,7 @@ namespace Player
             _powerSuit = GetComponentInChildren<PowerSuit>();
             if(_powerSuit == null) Debug.LogError("No power suit attached to player.");
             
-            _controllerInput = new Control();
+            _controllerInput = new ControllerInput();
             _originalColliderSize = _boxCollider2D.size;
         }
 
@@ -117,25 +113,26 @@ namespace Player
             ColliderUpdate();
             
             //Collect Input -> updates _controllerInput
-            GetControllerInput();
+            _controllerInput.Update();
             
             //Update facing based on input
             FacingUpdate(_controllerInput);
             
             //If walljumped do not update horizontal direction
             if(hasWallJumped == false)
-                _moveDirection.x = _controllerInput.horizInput * speed;
+                moveDirection.x = _controllerInput.HorizInput * speed;
             
             if (isGrounded)     //Player on the ground...
             {
-                _moveDirection.y = 0.0f;              //Keeps animation from bouncing
+                moveDirection.y = 0.0f;              //Keeps animation from bouncing
                 isJumping = false;
+                isHighJumping = false;
                 isFalling = false;
                 
 
                 if (Input.GetButtonDown("Jump"))
                 {
-                    Jump(_controllerInput.horizInput);
+                    Jump(_controllerInput.HorizInput);
                 }
 
             }
@@ -145,75 +142,90 @@ namespace Player
                 {
                     isFalling = true;
                 }
-                if (_controllerInput.horizInput > 0)
+                if (_controllerInput.HorizInput > 0)
                 {
                     isFacingRight = true;
                 }
-                else if (_controllerInput.horizInput < 0)
+                else if (_controllerInput.HorizInput < 0)
                 {
                     isFacingRight = false;
                 }
                 if (Input.GetButtonUp("Jump"))
                 {
-                    if (_moveDirection.y > 0)
+                    if (moveDirection.y > 0)
                     {
-                        _moveDirection.y = _moveDirection.y * 0.5f;
+                        moveDirection.y = moveDirection.y * 0.5f;
                     }
                 }
             }
             
             //Apply gravity no matter what
-            _moveDirection.y -= gravity * Time.deltaTime;
+            moveDirection.y -= gravity * Time.deltaTime;
             
             //If crouching, or able to wall jump, no x movement
-            if (isCrouched)
+            if (isCrouched && !isMorphBall)
             {
-                _moveDirection.x = 0.0f;    //However can still change facing from movement inputs above...
+                moveDirection.x = 0.0f;    //However can still change facing from movement inputs above...
             }
                 
             //Move and update collisionState
-            _cc2D.Move(_moveDirection * Time.deltaTime);
+            _cc2D.Move(moveDirection * Time.deltaTime);
             _collisionState = _cc2D.collisionState;
 
             isGrounded = _collisionState.Below;
             
+            
             //Crouching
-            if (_controllerInput.down && !_controllerInput.left && !_controllerInput.right && !isCrouched)
+            if (_controllerInput.TappedDownThisFrame && !isCrouched)
             {
-                if(_controllerInput.vertInput < 0.35)            //Since joystick, ensure intentional down
+                if(_controllerInput.VertInput < -0.35f)            //Since joystick, ensure intentional down
                     isCrouched = true;
             }
-
-            if (_controllerInput.up && isCrouched)               //Can return without vertical check because no moving when crouching
+            else if (isCrouched)               //Can return without vertical check because no moving when crouching
             {                                                    //Will need to do vertical check when returning from morph ball state (unimplemented so far)
-                if(_controllerInput.vertInput > 0.35)            //Since joystick, ensure intentional up
-                    isCrouched = false;
+                if(_controllerInput.VertInput > 0.5f)            //Since joystick, ensure intentional up
+                {    isCrouched = false;}
+                if (_controllerInput.TappedDownThisFrame && isCrouched && _powerSuit.IsEnabled(PowerSuit.Upgrade.MorphBall))
+                {
+                    if (_controllerInput.VertInput < -0.35f)
+                    {
+                        isMorphBall = true;
+                    }
+                
+                }
             }
             
-            // //Morph Ball Unimplemented (Keep for later)
-            // RaycastHit2D hitCeiling = Physics2D.Raycast(upper right corner, Vector2.up, 2.0f, default);
-            // RaycastHit2D hitCeiling = Physics2D.Raycast(upper left corner, Vector2.up, 2.0f, default);
-            if (_controllerInput.down && isCrouched && _powerSuit.IsEnabled(PowerSuit.Upgrade.MorphBall))
+            // //Morph Ball 
+            
+            
+            if (_controllerInput.Up && isMorphBall)
             {
-                //Enter morph ball state
+                 if (_controllerInput.VertInput > 0.35) //Ensure intentional up
+                 {
+                     float xOffset = _boxCollider2D.size.x / 2;
+                     float yOffset = _boxCollider2D.size.y;
+
+                     Vector2 upperL = new Vector2(transform.position.x - xOffset, transform.position.y + yOffset);
+                     Vector2 upperR = new Vector2(transform.position.x + xOffset, transform.position.y + yOffset);
+                     
+                     RaycastHit2D hitCeilingR = Physics2D.Raycast(upperR, Vector2.up, 0.5f);
+                     RaycastHit2D hitCeilingL = Physics2D.Raycast(upperL, Vector2.up, 0.5f);
+                     //Check overhead if able to expand collider again
+                     if (!hitCeilingR && !hitCeilingL)
+                     {
+                         //Exit morph ball state to crouched state
+                         isMorphBall = false;
+                     }
+                 }
+
             }
-            //
-            // if (vertInput > 0.0f && isMorphBallMode)
-            // {
-            //     //Check overhead if able to expand collider again
-            //     if (!hitCeiling.collider)
-            //     {
-            //         //Exit morph ball state to crouched state
-            //         isMorphBallMode = false;
-            //         isCrouched = true;
-            //     }
-            //     
-            // }
+            
+            
             
 
             if (_collisionState.Above)
             {
-                _moveDirection.y -= gravity * Time.deltaTime;
+                moveDirection.y -= gravity * Time.deltaTime;
             }
 
             if (!wallJumpAble)
@@ -222,19 +234,19 @@ namespace Player
             //Wall jumping
             if (wallJumpAble)     
             {
-                if (_controllerInput.jump && wallJumpAbleLeft && _controllerInput.left)
+                if (_controllerInput.Jump && wallJumpAbleLeft && _controllerInput.Left)
                 {
                     WallJump();
                 }
 
-                if (_controllerInput.jump && wallJumpAbleRight && _controllerInput.right)
+                if (_controllerInput.Jump && wallJumpAbleRight && _controllerInput.Right)
                 {
                     WallJump();
                 }
 
             }
 
-            if (_controllerInput.shoot)
+            if (_controllerInput.Shoot)
             {
                 FireWeapon();
             }
@@ -265,30 +277,18 @@ namespace Player
             _cc2D.RecalculateDistanceBetweenRays();
         }
         
-        private void GetControllerInput()
-        {
-            _controllerInput.horizInput = Input.GetAxis("Horizontal");
-            _controllerInput.vertInput = Input.GetAxis("Vertical");
-            _controllerInput.jump = Input.GetButtonDown("Jump");
-            _controllerInput.shoot = Input.GetButtonDown("Fire1");
-
-            _controllerInput.up = _controllerInput.vertInput > 0 ? true : false;
-            _controllerInput.down = _controllerInput.vertInput < 0 ? true : false;
-            _controllerInput.left = _controllerInput.horizInput < 0 ? true : false;
-            _controllerInput.right = _controllerInput.horizInput > 0 ? true : false;
-        }
         
-        private void FacingUpdate(Control controller)
+        private void FacingUpdate(ControllerInput controller)
         {
-            if (!controller.left && !controller.right)
+            if (!controller.Left && !controller.Right)
             {
                 isFacingRight = isFacingRight;
             }
-            else if (controller.right && !controller.left)
+            else if (controller.Right && !controller.Left)
             {
                 isFacingRight = true;
             }
-            else if (controller.left && !controller.right)
+            else if (controller.Left && !controller.Right)
             {
                 isFacingRight = false;
             }
@@ -298,13 +298,13 @@ namespace Player
         {
             if (Mathf.Abs(horizInput) > 0.15)     //Somersault
             {
-                _moveDirection.y = jumpSpeed;
+                moveDirection.y = jumpSpeed;
                 isJumping = true;
                 isHighJumping = false;
             }
             else                                  //HighJump
             {
-                _moveDirection.y = jumpSpeed;
+                moveDirection.y = jumpSpeed;
                 isJumping = true;
                 isHighJumping = true;
             }
@@ -350,15 +350,15 @@ namespace Player
             OnWallJump();
             if (isFacingRight)
             {
-                _moveDirection.x = jumpSpeed * wallJumpMultiplier;
-                _moveDirection.y = jumpSpeed * wallJumpMultiplier;
+                moveDirection.x = jumpSpeed * wallJumpMultiplier;
+                moveDirection.y = jumpSpeed * wallJumpMultiplier;
                 isFacingRight = true;
                 _lastWallJumpLeft = false;
             }
             else if (!isFacingRight)
             {
-                _moveDirection.x = -jumpSpeed * wallJumpMultiplier;
-                _moveDirection.y = jumpSpeed * wallJumpMultiplier;
+                moveDirection.x = -jumpSpeed * wallJumpMultiplier;
+                moveDirection.y = jumpSpeed * wallJumpMultiplier;
                 isFacingRight = false;
                 _lastWallJumpLeft = true;
             }
