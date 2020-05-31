@@ -5,12 +5,16 @@ namespace Player.State
 {
     public class CrouchingState : PlayerState
     {
+        private float crouchDelay = 0.25f;
+        private float timeCrouched;
+        
         public CrouchingState(PlayerController playerController)
         {
             base.player = playerController;
         }
         public override void EnterState()
         {
+            timeCrouched = 0.0f;
             player.Animator.Crouch();
             Debug.Log("Entered Crouched State");
         }
@@ -37,18 +41,18 @@ namespace Player.State
 
             player.isGrounded = player.CollisionState.Below;
 
-            if (input.Up && (input.VertInput > 0.5f))
+            if (input.Up && (input.VertInput > 0.7f) && (timeCrouched > crouchDelay))
             {
                 //Transition to StandingState
                 player.TransitionToState(player.standingState);
             }
-
-            /*if (input.TappedDownThisFrame && player.powerSuit.IsEnabled(PowerSuit.Upgrade.MorphBall))
+            Debug.Log(input.VertInput);
+            if (input.TappedDownThisFrame && (input.VertInput < -0.6f) && player.powerSuit.IsEnabled(PowerSuit.Upgrade.MorphBall) && (timeCrouched > crouchDelay))
             {
                 //Transition to Morphball
                 player.TransitionToState(player.morphBallState);
-            }*/
-            
+            }
+            timeCrouched += Time.deltaTime;
         }
 
         public override void ExitState()

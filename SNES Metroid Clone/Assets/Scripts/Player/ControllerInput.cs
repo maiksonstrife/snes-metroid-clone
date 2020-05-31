@@ -80,5 +80,10 @@ namespace Player
             _shoot = Input.GetButtonDown("Fire1");
             _jump = Input.GetButtonDown("Jump");
         }
+
+        public void ResetDownTap()
+        {
+            _tappedDown = false;
+        }
     }
 }

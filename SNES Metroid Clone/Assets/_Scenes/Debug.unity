@@ -22336,6 +22336,11 @@ PrefabInstance:
       propertyPath: _morphballEnabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1943734443, guid: 04dccb33f292dbc4997c5c0679232e9a, type: 3}
+      propertyPath: _powerSuitData
+      value: 
+      objectReference: {fileID: 11400000, guid: 17314ad0913a96e4cba63f55309cbf24,
+        type: 2}
     - target: {fileID: 4115657746869250571, guid: 04dccb33f292dbc4997c5c0679232e9a,
         type: 3}
       propertyPath: m_LocalPosition.x

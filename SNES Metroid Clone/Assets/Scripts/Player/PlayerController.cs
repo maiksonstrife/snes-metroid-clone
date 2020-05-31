@@ -5,6 +5,7 @@ using UnityEngine;
 
 using Equipment;
 using Player.State;
+using Unity.Mathematics;
 using UnityEngine.Serialization;
 using Weapons;
 
@@ -17,7 +18,7 @@ namespace Player
 
         private CharacterController2D _cc2D;
         public CharacterController2D CC2D => _cc2D;
-        private BoxCollider2D _boxCollider2D;
+        public BoxCollider2D _boxCollider2D;
         private CharacterController2D.CharacterCollisionState2D _collisionState;
 
         public PlayerAnimator Animator;
@@ -165,38 +166,29 @@ namespace Player
             if (_canShoot)
             {
                 GameObject projectile = powerSuit.GetSelectedWeapon();
-
+                Vector3 position = Vector3.zero;
+                Quaternion rotation = Quaternion.identity;
+                
                 if (isFacingRight)
                 {
-                    Vector3 position = new Vector3(transform.position.x + 0.25f, transform.position.y + 1.6f, 0.0f);
-                    GameObject instantiatedProjectile = Instantiate(projectile, position, Quaternion.Euler(0f, 0f, 180.0f));
-                    IWeapon weapon = instantiatedProjectile.GetComponent<PowerBeam>();
-                    if (weapon == null)
-                    {
-                        Debug.LogError("Couldn't find IWeapon implementation on weapon.");
-                    }
-                    else
-                    {
-                        weapon.SetDirection(Vector3.left);
-                    }
+                    position = new Vector3(transform.position.x + 0.25f, transform.position.y + 1.6f, 0.0f);
+                    rotation = Quaternion.Euler(0.0f, 0.0f, 180.0f);
 
                 }
                 else
                 {
-                    Vector3 position = new Vector3(transform.position.x - 0.25f, transform.position.y + 1.6f, 0.0f);
-                    GameObject instantiatedProjectile = Instantiate(projectile, position, Quaternion.identity);
-                    IWeapon weapon = instantiatedProjectile.GetComponent<PowerBeam>();
-                    if (weapon == null)
-                    {
-                        Debug.LogError("Couldn't find IWeapon implementation on beam weapon.");
-                    }
-                    else
-                    {
-                        weapon.SetDirection(Vector3.left);
-                    }
-
+                    position = new Vector3(transform.position.x - 0.25f, transform.position.y + 1.6f, 0.0f);
                 }
-
+                GameObject instantiatedProjectile = Instantiate(projectile, position, rotation);
+                IWeapon weapon = instantiatedProjectile.GetComponent<IWeapon>();
+                if (weapon == null)
+                {
+                    Debug.LogError("Couldn't find IWeapon implementation on beam weapon.");
+                }
+                else
+                {
+                    weapon.SetDirection(Vector3.left);
+                }
                 _canShoot = false;
                 StartCoroutine(ShootCooldown());
             }

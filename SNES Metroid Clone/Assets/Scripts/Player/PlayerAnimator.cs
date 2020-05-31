@@ -75,6 +75,7 @@ namespace Player
             _animator.SetBool("Is Grounded", true);
             _animator.ResetTrigger("Wall Jump");
             _animator.SetBool("Is Jumping", false);
+            _animator.SetBool("Is Morphball", false);
         }
 
         public void Stand()
@@ -102,7 +103,12 @@ namespace Player
             _animator.SetBool("Is Grounded", false);
             _animator.SetBool("Is Jumping", true);
         }
-        
+
+        public void EnterMorphBall()
+        {
+            _animator.SetBool("Is Morphball", true);
+            //_animator.SetBool("Is Crouching", false);
+        }
         
     }
 }

@@ -5,6 +5,10 @@ namespace Player.State
 {
     public class StandingState : PlayerState
     {
+        
+        Vector3 shootOffsetLeft = new Vector3(0.25f, 1.6f, 0.0f);
+        Vector3 shootOffsetRight = new Vector3(-0.25f, 1.6f, 0.0f);
+        
         public StandingState(PlayerController playerController)
         {
             base.player = playerController;
