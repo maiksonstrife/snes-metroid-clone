@@ -2,7 +2,6 @@
 
 namespace Player
 {
-    [RequireComponent(typeof(PlayerController))]
     public class PlayerAnimator : MonoBehaviour
     {
         private PlayerController _playerController;
@@ -14,10 +13,7 @@ namespace Player
         // Start is called before the first frame update
         void Start()
         {
-            _playerController = GetComponent<PlayerController>();
             _animator = GetComponentInChildren<Animator>();
-            PlayerController.OnWallJump += WallJump;
-
             _base = _animator.GetLayerIndex("Start Layer");
             _currentLayer = _base;
 
@@ -30,29 +26,8 @@ namespace Player
         // Update is called once per frame
         void Update()
         {
-            float horizInput = Input.GetAxis("Horizontal");
-            _animator.SetFloat("Horizontal Input", Mathf.Abs(horizInput));
             
-            _animator.SetBool("Is Grounded", _playerController.isGrounded);
-            if(_playerController.isGrounded) _animator.ResetTrigger("Wall Jump");        // Need to reset if slid to ground
-            _animator.SetBool("Is Jumping", _playerController.isJumping);
-            _animator.SetBool("Wall Jump Able", _playerController.wallJumpAble);
-            if(!_playerController.wallJumpAble) _animator.ResetTrigger("Wall Jump");    //Need to reset if slid to point where not on the wall
-            _animator.SetBool("Is Crouching", _playerController.isCrouched);
-            _animator.SetBool("Is Morphball", _playerController.isMorphBall);
             
-            if (_playerController.isFacingRight && _currentLayer != _facingRight)
-            {
-                _animator.SetLayerWeight(_facingRight, 1.0f);
-                _currentLayer = _facingRight;
-                ZeroOtherWeights();
-            }
-            else if (!_playerController.isFacingRight && _currentLayer != _facingLeft)
-            {
-                _animator.SetLayerWeight(_facingLeft, 1.0f);
-                _currentLayer = _facingLeft;
-                ZeroOtherWeights();
-            }
         }
 
         private void ZeroOtherWeights()
@@ -66,9 +41,73 @@ namespace Player
             }
         }
 
-        private void WallJump()
+        private void FaceRight()
         {
+            _animator.SetLayerWeight(_facingRight, 1.0f);
+            _currentLayer = _facingRight;
+            ZeroOtherWeights();
+        }
+
+        private void FaceLeft()
+        {
+            _animator.SetLayerWeight(_facingLeft, 1.0f);
+            _currentLayer = _facingLeft;
+            ZeroOtherWeights();
+        }
+
+        public void JoystickUpdate(ControllerInput input)
+        {
+            //Debug.Log("JoystickUpdate" + input.HorizInput);
+            _animator.SetFloat("Horizontal Input", Mathf.Abs(input.HorizInput));
+            if(input.Left)
+                FaceLeft();
+            if(input.Right)
+                FaceRight();
+        }
+
+        public void PhysicsUpdate(Vector3 velocity)
+        {
+            
+        }
+        public void Crouch()
+        {
+            _animator.SetBool("Is Crouching", true);
+            _animator.SetBool("Is Grounded", true);
+            _animator.ResetTrigger("Wall Jump");
+            _animator.SetBool("Is Jumping", false);
+            _animator.SetBool("Is Morphball", false);
+        }
+
+        public void Stand()
+        {
+            _animator.SetBool("Is Crouching", false);
+            _animator.SetBool("Is Grounded", true);
+            _animator.ResetTrigger("Wall Jump");
+            _animator.SetBool("Is Jumping", false);
+        }
+
+        public void WallJump()
+        {
+            _animator.SetBool("Wall Jump Able", true);
             _animator.SetTrigger("Wall Jump");
+        }
+
+        public void HighJump()
+        {
+            _animator.SetBool("Is Grounded", false);
+            _animator.SetBool("Is Jumping", true);
+        }
+
+        public void Somersault()
+        {
+            _animator.SetBool("Is Grounded", false);
+            _animator.SetBool("Is Jumping", true);
+        }
+
+        public void EnterMorphBall()
+        {
+            _animator.SetBool("Is Morphball", true);
+            //_animator.SetBool("Is Crouching", false);
         }
         
     }

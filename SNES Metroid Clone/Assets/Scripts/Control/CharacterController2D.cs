@@ -253,6 +253,7 @@ namespace Control
 		/// <param name="deltaMovement">Delta movement.</param>
 		public void Move( Vector3 deltaMovement )
 		{
+			//Debug.Log(deltaMovement.ToString());
 			// save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame
 			collisionState.WasGroundedLastFrame = collisionState.Below;
 

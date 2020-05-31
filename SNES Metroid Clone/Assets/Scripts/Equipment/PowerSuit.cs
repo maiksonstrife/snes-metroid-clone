@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using ScriptableObjects;
+using UnityEngine;
 
 namespace Equipment
 {
@@ -33,76 +34,53 @@ namespace Equipment
             ScrewAttack
         };
 
-        public bool _xrayVisorEnabled = false;
-        
-        public bool _morphballEnabled = false;
-        public bool _bombEnabled = false;
-        public bool _powerBombEnabled = false;
-        public bool _springBallEnabled = false;
+        [SerializeField] PowerSuitData _powerSuitData;
 
-        public bool _highJumpEnabled = false;
-        public bool _speedboostEnabled = false;
-        public bool _grappleBeamEnabled = false;
-        public bool _spaceJumpEnabled;
-        
-        public bool _chargeBeamEnabled = false;
-        
-        public bool _spazerBeamEnabled = false;
-        public bool _iceBeamEnabled = false;
-        public bool _waveBeamEnabled = false;
-        public bool _plasmaBeamEnabled = false;
-
-        private bool _isVariaSuit = false;
-        private bool _isGravitySuit = false;
-        public bool _screwAttackEnabled = false;
-
-        public GameObject PowerBeam;
-        
         public void Activate(Upgrade upgrade)
         {
             switch (upgrade)
             {
                 case Upgrade.XrayVisor:
-                    _xrayVisorEnabled = true;
+                    _powerSuitData.xrayVisorEnabled = true;
                     break;
                 case Upgrade.MorphBall:
-                    _morphballEnabled = true;
+                    _powerSuitData.morphballEnabled = true;
                     break;
                 case Upgrade.Bomb:
-                    _bombEnabled = true;
+                    _powerSuitData.bombEnabled = true;
                     break;
                 case Upgrade.PowerBomb:
-                    _powerBombEnabled = true;
+                    _powerSuitData.powerBombEnabled = true;
                     break;
                 case Upgrade.SpringBall:
-                    _springBallEnabled = true;
+                    _powerSuitData.springBallEnabled = true;
                     break;
                 case Upgrade.HighJump:
-                    _highJumpEnabled = true;
+                    _powerSuitData.highJumpEnabled = true;
                     break;
                 case Upgrade.SpeedBoost:
-                    _speedboostEnabled = true;
+                    _powerSuitData.speedboostEnabled = true;
                     break;
                 case Upgrade.GrappleBeam:
-                    _grappleBeamEnabled = true;
+                    _powerSuitData.grappleBeamEnabled = true;
                     break;
                 case Upgrade.SpaceJump:
-                    _spaceJumpEnabled = true;
+                    _powerSuitData.spaceJumpEnabled = true;
                     break;
                 case Upgrade.ChargeBeam:
-                    _chargeBeamEnabled = true;
+                    _powerSuitData.chargeBeamEnabled = true;
                     break;
                 case Upgrade.SpazerBeam:
-                    _spazerBeamEnabled = true;
+                    _powerSuitData.spazerBeamEnabled = true;
                     break;
                 case Upgrade.IceBeam:
-                    _iceBeamEnabled = true;
+                    _powerSuitData.iceBeamEnabled = true;
                     break;
                 case Upgrade.WaveBeam:
-                    _waveBeamEnabled = true;
+                    _powerSuitData.waveBeamEnabled = true;
                     break;
                 case Upgrade.PlasmaBeam:
-                    _plasmaBeamEnabled = true;
+                    _powerSuitData.plasmaBeamEnabled = true;
                     break;
             }
         }
@@ -112,33 +90,33 @@ namespace Equipment
             switch (upgrade)
             {
                 case Upgrade.XrayVisor:
-                    return _xrayVisorEnabled;
+                    return _powerSuitData.xrayVisorEnabled;
                 case Upgrade.MorphBall:
-                    return _morphballEnabled;
+                    return _powerSuitData.morphballEnabled;
                 case Upgrade.Bomb:
-                    return _bombEnabled;
+                    return _powerSuitData.bombEnabled;
                 case Upgrade.PowerBomb:
-                    return _powerBombEnabled;
+                    return _powerSuitData.powerBombEnabled;
                 case Upgrade.SpringBall:
-                    return _springBallEnabled;
+                    return _powerSuitData.springBallEnabled;
                 case Upgrade.HighJump:
-                    return _highJumpEnabled;
+                    return _powerSuitData.highJumpEnabled;
                 case Upgrade.SpeedBoost:
-                    return _speedboostEnabled;
+                    return _powerSuitData.speedboostEnabled;
                 case Upgrade.GrappleBeam:
-                    return _grappleBeamEnabled;
+                    return _powerSuitData.grappleBeamEnabled;
                 case Upgrade.SpaceJump:
-                    return _spaceJumpEnabled;
+                    return _powerSuitData.spaceJumpEnabled;
                 case Upgrade.ChargeBeam:
-                    return _chargeBeamEnabled;
+                    return _powerSuitData.chargeBeamEnabled;
                 case Upgrade.SpazerBeam:
-                    return _spazerBeamEnabled;
+                    return _powerSuitData.spazerBeamEnabled;
                 case Upgrade.IceBeam:
-                    return _iceBeamEnabled;
+                    return _powerSuitData.iceBeamEnabled;
                 case Upgrade.WaveBeam:
-                    return _waveBeamEnabled;
+                    return _powerSuitData.waveBeamEnabled;
                 case Upgrade.PlasmaBeam:
-                    return _plasmaBeamEnabled;
+                    return _powerSuitData.plasmaBeamEnabled;
                 default:
                     return false;
             }
@@ -146,7 +124,7 @@ namespace Equipment
 
         public GameObject GetSelectedWeapon()
         {
-            return PowerBeam;
+            return _powerSuitData.PowerBeam;
         }
     }
 }
