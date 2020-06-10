@@ -24,6 +24,7 @@ namespace Enemies
         private CharacterController2D _controller;
         public CharacterController2D.CharacterCollisionState2D collisionState;
         private BoxCollider2D _collider;
+        private SpriteRenderer spriteRender;
         
         public void Start()
         {
@@ -31,6 +32,7 @@ namespace Enemies
             moveDirection = Vector3.left;
             _controller = GetComponent<CharacterController2D>();
             _collider = GetComponent<BoxCollider2D>();
+            spriteRender = GetComponent<SpriteRenderer>();
             FallingState = new FallingState(this);
             CrawlingState = new CrawlingState(this);
             NegotiateCorner = new NegotiateCornerState(this);
@@ -113,27 +115,27 @@ namespace Enemies
         
         public void SetRotation(Vector3 gravityVector)
         {
+            
             if (gravityVector == Vector3.down)
             {
                 transform.rotation = Quaternion.identity;
-                GetComponent<SpriteRenderer>().flipY = false;
+                spriteRender.flipY = false;
             }
             else if (gravityVector == Vector3.up)
             {
                 transform.rotation = Quaternion.identity;
-                GetComponent<SpriteRenderer>().flipY = true;
+                spriteRender.flipY = true;
             }
             else if (gravityVector == Vector3.left)
             {
                 transform.rotation = Quaternion.Euler(0.0f, 0.0f, -90.0f);
-                GetComponent<SpriteRenderer>().flipY = false;
+                spriteRender.flipY = false;
             }
             else if (gravityVector == Vector3.right)
             {
                 transform.rotation = Quaternion.Euler(0.0f, 0.0f, -90.0f);
-                GetComponent<SpriteRenderer>().flipY = true;
+                spriteRender.flipY = true;
             }
-        
         }
         
         public void TransitionToState(EnemyState state)

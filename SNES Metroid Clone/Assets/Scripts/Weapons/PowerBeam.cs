@@ -36,7 +36,7 @@ namespace Weapons
 
         public void OnCollisionEnter2D(Collision2D other)
         {
-            //Debug.Log(other.gameObject.ToString());
+            Debug.Log("Beam Hit Object in layer " + other.gameObject.layer.ToString());
             if (other.gameObject.layer == 9) //Layer 9 is platforms
             {
                 GameObject.Instantiate(destructAnim, transform.position, quaternion.identity);
