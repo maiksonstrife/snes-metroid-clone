@@ -14,6 +14,7 @@ namespace Player
         void Start()
         {
             _animator = GetComponentInChildren<Animator>();
+            if(_animator == null) Debug.LogError("Player animator not found.");
             _base = _animator.GetLayerIndex("Start Layer");
             _currentLayer = _base;
 
